@@ -1,0 +1,4 @@
+factory - enemy spaceship builder
+observer - the sky
+strategy - off/def operational mode
+command - game controller: undo button etc
