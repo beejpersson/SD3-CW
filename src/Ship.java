@@ -1,9 +1,17 @@
 
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Random;
+
+
 public abstract class Ship {
 	
 	protected String type;
 	protected int xPos;
 	protected int yPos;
+	private ArrayList<Point> possibleMoves = new ArrayList<Point>();
+	private Random rn = new Random();
+	
 	
 	public String getType() {
 		return this.type;
@@ -30,6 +38,43 @@ public abstract class Ship {
 	}
 	
 	public void move(){
-		
+		if (!possibleMoves.isEmpty()){
+			possibleMoves.clear();
+		}
+		//North
+		if (this.yPos - 1 >= 0) {
+			possibleMoves.add(new Point(this.xPos, yPos - 1));
+		}
+		//North East
+		if (this.xPos + 1 <= 3 && this.yPos - 1 >= 0) {
+			possibleMoves.add(new Point(this.xPos + 1, this.yPos - 1));
+		}
+		//East
+		if (this.xPos + 1 <= 3) {
+			possibleMoves.add(new Point(this.xPos + 1, this.yPos));
+		}
+		//South East
+		if (this.xPos + 1 <= 3 && this.yPos + 1 <= 3) {
+			possibleMoves.add(new Point(this.xPos + 1, this.yPos + 1));
+		}
+		//South
+		if (this.yPos + 1 <= 3) {
+			possibleMoves.add(new Point(this.xPos, this.yPos + 1));
+		}
+		//South West
+		if (this.xPos - 1 >= 0 && this.yPos + 1 <= 3) {
+			possibleMoves.add(new Point(this.xPos - 1, this.yPos + 1));
+		}
+		//West
+		if (this.xPos - 1 >= 0) {
+			possibleMoves.add(new Point(this.xPos - 1, this.yPos));
+		}
+		//North West
+		if (this.xPos - 1 >= 0 && this.yPos - 1 >= 0) {
+			possibleMoves.add(new Point(this.xPos - 1, this.yPos - 1));
+		}
+		int random = rn.nextInt(possibleMoves.size());
+		setXPos(possibleMoves.get(random).x);
+		setYPos(possibleMoves.get(random).y);
 	}
 }
