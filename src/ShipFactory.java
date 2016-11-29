@@ -1,6 +1,7 @@
 
 public final class ShipFactory {
 
+	//Factory pattern, ship factory - handles all ship creation
 	public static Ship createShip(String type, int xPos, int yPos) {
 		Ship ship = null;
 		

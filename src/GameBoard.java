@@ -15,8 +15,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.JTextPane;
 
-public class GameBoard extends JFrame implements Observable {
+public class GameBoard extends JFrame /*implements Observable /*Part of not working observer pattern*/ {
 	
+	//Initialise variables
 	private JPanel contentPane;
 	private JButton btnStart;
 	private JButton btnMove;
@@ -32,9 +33,10 @@ public class GameBoard extends JFrame implements Observable {
 	private Random rn = new Random();
 	private Ship masterShip;
 	private ArrayList<Ship> enemyShips = new ArrayList<Ship>();
-	private ArrayList<OutputUpdater> outputUpdaterList = new ArrayList<OutputUpdater>();
-	private OutputUpdater outputUpdater;
+	//private ArrayList<OutputUpdater> outputUpdaterList = new ArrayList<OutputUpdater>(); //Part of not working observer pattern
+	//private OutputUpdater outputUpdater;
 	
+	//Constructor
 	public GameBoard() {
 	
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -54,7 +56,8 @@ public class GameBoard extends JFrame implements Observable {
 		contentPane.add(getOutput());
 		
 	}
-        
+    
+	//Press the start button to start the game
     private JButton getBtnStart() {
 		if (btnStart == null) {
 			btnStart = new JButton("Start");
@@ -67,7 +70,8 @@ public class GameBoard extends JFrame implements Observable {
 					int randomY = rn.nextInt(4);
 					masterShip = ShipFactory.createShip("MasterShip", randomX, randomY);
 					enemyShips.clear();
-					registerObserver(outputUpdater);
+					//registerObserver(outputUpdater); //Observer pattern not working
+					//Build the board
 					for (int i = 0; i < 4; i++) {
 						for (int j = 0; j < 4; j++) {
 							if (board[i][j] != null)
@@ -209,7 +213,7 @@ public class GameBoard extends JFrame implements Observable {
 					}
 					enemyShips.removeAll(deadEnemyShips);
 					deadEnemyShips.clear();
-					//notifyObservers();
+					//notifyObservers(); //Observer pattern not working
 				}
 			});
 		}
@@ -245,10 +249,11 @@ public class GameBoard extends JFrame implements Observable {
   		return btnMode;
      }
     
+    //Functionless undo button, intended to work with command pattern - not time to implement command pattern
     private JButton getBtnUndo() {
   		if (btnUndo == null) {
   			btnUndo = new JButton("Undo");
-  			btnUndo.setToolTipText("Undo the previous move.");
+  			btnUndo.setToolTipText("Functionless");
   			btnUndo.setBounds(395, 505, 80, 30);
   		}
   		return btnUndo;
@@ -282,12 +287,13 @@ public class GameBoard extends JFrame implements Observable {
   		return scrollPane;
      }
     
-	public void setOutput(String text) {
+    //Part of observer pattern - not working
+	/*public void setOutput(String text) { 
 		this.output.setText(text);
 	}
 	
 
-	public void registerObserver(OutputUpdater o) {
+	/*public void registerObserver(OutputUpdater o) {
 		outputUpdaterList.add(o);
 	}
 
@@ -297,5 +303,5 @@ public class GameBoard extends JFrame implements Observable {
 			//JOptionPane.showMessageDialog(null, output.getText());
 			o.updateOutput(output.getText());
 		}
-	}
+	}*/
 }

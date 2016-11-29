@@ -1,7 +1,7 @@
 
 import javax.swing.JOptionPane;
 
-public class OutputUpdater implements Observer {
+public class OutputUpdater implements Observer {//Not working
 	
 	String outputText;
 	GameBoard gameBoard;

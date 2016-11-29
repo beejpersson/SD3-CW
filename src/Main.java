@@ -4,6 +4,7 @@ import javax.swing.JFrame;
 	
 public class Main extends JFrame {
 
+	//Main method, runs application
 	public static void main(String[] args) {
 			
 		EventQueue.invokeLater(new Runnable() {

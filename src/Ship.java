@@ -3,9 +3,9 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
 
-
 public abstract class Ship extends Thread {
 	
+	//Initialise ship attributes
 	protected String type;
 	protected int xPos;
 	protected int yPos;
@@ -13,7 +13,7 @@ public abstract class Ship extends Thread {
 	private ArrayList<Point> possibleMoves = new ArrayList<Point>();
 	private Random rn = new Random();
 	
-	
+	//getters and setters for ship attributes
 	public String getType() {
 		return this.type;
 	}
@@ -45,10 +45,12 @@ public abstract class Ship extends Thread {
 		this.mode = mode;
 	}
 	
+	//Strategy pattern, changes master ship mode
 	public void informPlayer() {
 		this.mode.inform();
 	}
 	
+	//Movement limitations
 	public void move(){
 		if (!possibleMoves.isEmpty()){
 			possibleMoves.clear();
@@ -90,6 +92,7 @@ public abstract class Ship extends Thread {
 		setYPos(possibleMoves.get(random).y);
 	}
 	
+	//Run each ship instance in a thread
 	public void run() { 
 		try {
 			Thread.sleep(50);

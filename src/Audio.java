@@ -5,10 +5,7 @@ import javax.sound.sampled.Clip;
 
 public class Audio {
 	
-	//public static final Audio audio = new Audio("audio.mp3");
-	
-	//private AudioClip clip;
-	
+	//Audio method to play desired audio file
 	public static synchronized void playSound(final String filename) {
 		  new Thread(new Runnable() {
 		    public void run() {
