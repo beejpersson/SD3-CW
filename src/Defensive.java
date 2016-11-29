@@ -1,7 +1,8 @@
+import javax.swing.JOptionPane;
 
 public class Defensive implements OperationalMode {
 	
-	public void attack() {
-		System.out.println("Kills 1");
+	public void inform() {
+		JOptionPane.showMessageDialog(null, "Defensive Mode");
 	}
 }

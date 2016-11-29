@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
-public abstract class Ship {
+public abstract class Ship extends Thread {
 	
 	protected String type;
 	protected int xPos;
 	protected int yPos;
+	protected OperationalMode mode;
 	private ArrayList<Point> possibleMoves = new ArrayList<Point>();
 	private Random rn = new Random();
 	
@@ -35,6 +36,17 @@ public abstract class Ship {
 
 	public void setYPos(int yPos) {
 		this.yPos = yPos;
+	}
+	
+	public OperationalMode getMode() {
+		return this.mode;
+	}
+	public void setMode(OperationalMode mode) {
+		this.mode = mode;
+	}
+	
+	public void informPlayer() {
+		this.mode.inform();
 	}
 	
 	public void move(){
@@ -76,5 +88,15 @@ public abstract class Ship {
 		int random = rn.nextInt(possibleMoves.size());
 		setXPos(possibleMoves.get(random).x);
 		setYPos(possibleMoves.get(random).y);
+	}
+	
+	public void run() { 
+		try {
+			Thread.sleep(50);
+			System.out.println(this.toString());
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		move();
 	}
 }

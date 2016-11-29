@@ -8,13 +8,14 @@ public class OutputUpdater implements Observer {
 	
 	public void updateOutput(String output) {
 		this.outputText = output;
-		display();
+		JOptionPane.showMessageDialog(null, this.outputText);
 		
 	}
 	
 	public void display() {
 		//gameBoard.setOutput(outputText);
-		JOptionPane.showMessageDialog(null, this.outputText, "", JOptionPane.INFORMATION_MESSAGE);
+		System.out.println("hello");
+		JOptionPane.showMessageDialog(null, outputText);
 	}
 
 }

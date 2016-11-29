@@ -1,50 +1,28 @@
 
 import javax.swing.JFrame;
 import javax.swing.JButton;
-import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
-import java.io.IOException;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EtchedBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import java.awt.Component;
-import javax.swing.SwingConstants;
-
 import java.util.ArrayList;
 import java.util.Random;
-import javax.swing.JTextArea;
 import javax.swing.JTextPane;
-import java.awt.Scrollbar;
 
-public class GameBoard extends JFrame implements Observable{
+public class GameBoard extends JFrame implements Observable {
 	
 	private JPanel contentPane;
 	private JButton btnStart;
 	private JButton btnMove;
-	private JButton btnQuit;
+	private JButton btnMode;
 	private JButton btnUndo;
+	private JButton btnQuit;
 	private JTextPane output;
 	private JScrollPane scrollPane;
 	private JTextPane boardSquare;
@@ -53,8 +31,9 @@ public class GameBoard extends JFrame implements Observable{
 	private JTextPane[][] board = new JTextPane[4][4];
 	private Random rn = new Random();
 	private Ship masterShip;
-	private ArrayList<Ship> EnemyShips = new ArrayList<Ship>();
+	private ArrayList<Ship> enemyShips = new ArrayList<Ship>();
 	private ArrayList<OutputUpdater> outputUpdaterList = new ArrayList<OutputUpdater>();
+	private OutputUpdater outputUpdater;
 	
 	public GameBoard() {
 	
@@ -69,8 +48,9 @@ public class GameBoard extends JFrame implements Observable{
 		
 		contentPane.add(getBtnStart());
 		contentPane.add(getBtnMove());
-		contentPane.add(getBtnQuit());
+		contentPane.add(getBtnMode());
 		contentPane.add(getBtnUndo());
+		contentPane.add(getBtnQuit());
 		contentPane.add(getOutput());
 		
 	}
@@ -78,12 +58,16 @@ public class GameBoard extends JFrame implements Observable{
     private JButton getBtnStart() {
 		if (btnStart == null) {
 			btnStart = new JButton("Start");
-			btnStart.setBounds(60, 505, 85, 30);
+			btnStart.setToolTipText("Start a new game");
+			btnStart.setBounds(20, 505, 85, 30);
 			btnStart.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					Audio.playSound("audio.wav");
 					int randomX = rn.nextInt(4);
 					int randomY = rn.nextInt(4);
 					masterShip = ShipFactory.createShip("MasterShip", randomX, randomY);
+					enemyShips.clear();
+					registerObserver(outputUpdater);
 					for (int i = 0; i < 4; i++) {
 						for (int j = 0; j < 4; j++) {
 							if (board[i][j] != null)
@@ -116,33 +100,40 @@ public class GameBoard extends JFrame implements Observable{
 		return btnStart;
     }
     
+    //Make a move
     private JButton getBtnMove() {
 		if (btnMove == null) {
 			btnMove = new JButton("Move");
-			btnMove.setBounds(185, 505, 80, 30);
+			btnMove.setToolTipText("Make a move.");
+			btnMove.setBounds(145, 505, 80, 30);
 			btnMove.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					//No movement when game hasn't started
 					if (masterShip == null){
 						JOptionPane.showMessageDialog(null, "You can only move once the game has started.");
 						return;
 					}
+					//Move enemy ships
 					output.setText(output.getText() + "\n\nNEXT MOVE");
-					if (!EnemyShips.isEmpty()) {
-						for (Ship enemyShip : EnemyShips) {
-							enemyShip.move();
+					if (!enemyShips.isEmpty()) {
+						for (Ship enemyShip : enemyShips) {
+							enemyShip.run();
 						}
 					}
+					//Spawn enemy ships
 					int random = rn.nextInt(8);
 					if (random == 0){
-						EnemyShips.add(ShipFactory.createShip("BattleStar", 0, 0));
+						enemyShips.add(ShipFactory.createShip("BattleStar", 0, 0));
 					}
 					else if (random == 3){
-						EnemyShips.add(ShipFactory.createShip("BattleCruiser", 0, 0));
+						enemyShips.add(ShipFactory.createShip("BattleCruiser", 0, 0));
 					}
 					else if (random == 6){
-						EnemyShips.add(ShipFactory.createShip("BattleShooter", 0, 0));
+						enemyShips.add(ShipFactory.createShip("BattleShooter", 0, 0));
 					}
-					masterShip.move();	
+					//Move master ship
+					masterShip.run();
+					//Build board with ships in correct squares
 					for (int i = 0; i < 4; i++) {
 						for (int j = 0; j < 4; j++) {
 							if (board[i][j] != null)
@@ -165,8 +156,8 @@ public class GameBoard extends JFrame implements Observable{
 							if (i == masterShip.getXPos() && j == masterShip.getYPos()) {
 								boardSquare.setText(boardSquare.getText() + "\n" + masterShip.getType());
 							}
-							if (!EnemyShips.isEmpty()) {
-								for (Ship enemyShip : EnemyShips) {
+							if (!enemyShips.isEmpty()) {
+								for (Ship enemyShip : enemyShips) {
 									if (i == enemyShip.getXPos() && j == enemyShip.getYPos()) {
 										boardSquare.setText(boardSquare.getText() + "\n" + enemyShip.getType());
 									}
@@ -175,29 +166,100 @@ public class GameBoard extends JFrame implements Observable{
 							contentPane.add(board[i][j]);
 						}
 					}
-					for (Ship enemyShip : EnemyShips){
+					//Output ships new locations
+					for (Ship enemyShip : enemyShips){
 						output.setText(output.getText() + "\n" + enemyShip.getType() + " moved to square (" + enemyShip.getXPos() + ", " + enemyShip.getYPos() + ").");
 					}
 					output.setText(output.getText() + "\n" + masterShip.getType() + " moved to square (" + masterShip.getXPos() + ", " + masterShip.getYPos() + ").");
+					
+					//Handling killing of enemy ships and master ship, game over
+					ArrayList<Ship> deadEnemyShips = new ArrayList<Ship>();
+					for (Ship enemyShip : enemyShips){
+						//In offensive mode kill 3, more than 3 then master ship destroyed
+						if (masterShip.getMode().getClass() == Offensive.class){
+							if (deadEnemyShips.size() < 3){
+								if (enemyShip.getXPos() == masterShip.getXPos() && enemyShip.getYPos() == masterShip.getYPos()){
+									deadEnemyShips.add(enemyShip);
+									output.setText(output.getText() + "\n" + masterShip.getType() + " destroyed " + enemyShip.getType() + " in square (" + masterShip.getXPos()+ ", " + masterShip.getYPos() + ").");
+								}
+							} else {
+								if (enemyShip.getXPos() == masterShip.getXPos() && enemyShip.getYPos() == masterShip.getYPos()){
+									output.setText(output.getText() + "\n" + masterShip.getType() + " destroyed. \n\nGAME OVER");
+									masterShip = null;
+									Audio.playSound("gameover.wav");
+									return;
+								}
+							}
+						//In defensive mode only kill 1, more than 1 then master ship destroyed
+						} else {
+							if (deadEnemyShips.size() < 1){
+								if (enemyShip.getXPos() == masterShip.getXPos() && enemyShip.getYPos() == masterShip.getYPos()){
+									deadEnemyShips.add(enemyShip);
+									output.setText(output.getText() + "\n" + masterShip.getType() + " destroyed " + enemyShip.getType() + " in square (" + masterShip.getXPos()+ ", " + masterShip.getYPos() + ").");
+								}
+							} else {
+								if (enemyShip.getXPos() == masterShip.getXPos() && enemyShip.getYPos() == masterShip.getYPos()){
+									output.setText(output.getText() + "\n" + masterShip.getType() + " destroyed. \n\nGAME OVER");
+									masterShip = null;
+									Audio.playSound("gameover.wav");
+									return;
+								}
+							}
+						}
+					}
+					enemyShips.removeAll(deadEnemyShips);
+					deadEnemyShips.clear();
+					//notifyObservers();
 				}
 			});
 		}
 		return btnMove;
     }
     
+    //Change the mastership's operational mode
+    private JButton getBtnMode() {
+  		if (btnMode == null) {
+  			btnMode = new JButton("Mode");
+  			btnMode.setToolTipText("Change the Operational Mode of the MasterShip.");
+  			btnMode.setBounds(270, 505, 80, 30);
+  			btnMode.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					//Can't change mode when there's no ship
+					if (masterShip == null){
+						JOptionPane.showMessageDialog(null, "You can only change mode once the game has started.");
+						return;
+					}
+					
+					//Change the mode
+					if (masterShip.getMode().getClass() == Defensive.class){
+						masterShip.setMode(new Offensive());
+						masterShip.informPlayer();
+					}
+					else {
+						masterShip.setMode(new Defensive());
+						masterShip.informPlayer();
+					}
+				}
+			});
+  		}
+  		return btnMode;
+     }
+    
     private JButton getBtnUndo() {
   		if (btnUndo == null) {
   			btnUndo = new JButton("Undo");
-  			btnUndo.setBounds(310, 505, 80, 30);
+  			btnUndo.setToolTipText("Undo the previous move.");
+  			btnUndo.setBounds(395, 505, 80, 30);
   		}
   		return btnUndo;
      }
     
+    //Quit the program
     private JButton getBtnQuit() {
   		if (btnQuit == null) {
   			btnQuit = new JButton("Quit");
   			btnQuit.setToolTipText("Quit the game and close the window.");
-  			btnQuit.setBounds(435, 505, 80, 30);
+  			btnQuit.setBounds(515, 505, 80, 30);
   			btnQuit.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.exit(0);
@@ -207,6 +269,7 @@ public class GameBoard extends JFrame implements Observable{
   		return btnQuit;
      }
     
+    //Output text box
     private JScrollPane getOutput() {
   		if (output == null) {
   			output = new JTextPane();
@@ -225,13 +288,14 @@ public class GameBoard extends JFrame implements Observable{
 	
 
 	public void registerObserver(OutputUpdater o) {
-		this.outputUpdaterList.add(o);
+		outputUpdaterList.add(o);
 	}
 
 	public void notifyObservers() {
-		for (OutputUpdater o : this.outputUpdaterList)
+		for (OutputUpdater o : outputUpdaterList)
 		{
-			o.updateOutput(this.output.getText());
+			//JOptionPane.showMessageDialog(null, output.getText());
+			o.updateOutput(output.getText());
 		}
 	}
 }

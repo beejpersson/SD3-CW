@@ -1,6 +1,5 @@
 
 public interface OperationalMode {
 	
-	public void attack();
-	
+	public void inform();
 }
